@@ -1683,7 +1683,10 @@ export const StudentDashboard: React.FC<Props> = ({
                 <div className="p-4 space-y-3">
                   {activeHw.notes && (
                     <div className={`${theme.bg} border ${theme.border} rounded-xl p-3`}>
-                      <p className={`text-xs font-bold ${theme.text} mb-1 flex items-center gap-1`}><BookOpen size={12} /> Notes</p>
+                      <div className="flex justify-between items-center mb-1">
+                        <p className={`text-xs font-bold ${theme.text} flex items-center gap-1`}><BookOpen size={12} /> Notes</p>
+                        <SpeakButton text={activeHw.notes.replace(/<[^>]*>?/gm, '')} className={`p-1.5 rounded-full ${theme.bgSoft} ${theme.text} hover:opacity-80`} iconSize={14} />
+                      </div>
                       <div className="text-sm text-slate-700 whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: activeHw.notes }} />
                     </div>
                   )}
