@@ -324,27 +324,14 @@ export function parseMCQText(text: string): { questions: MCQItem[], notes: {titl
           const textAfterLastMatch = cleanedBlock.substring(lastMatch.index + lastMatch[0].length).trim();
           if (textAfterLastMatch.length > 20 && !textAfterLastMatch.startsWith('Options') && !textAfterLastMatch.startsWith('Question')) {
               // Try to extract an HTML topic tag if it exists in the trailing text
-              const topicMatch = textAfterLastMatch.match(/<h[1-6][^>]*>(.*?)<\/h[1-6]>/i);
+              // The note belongs to the question it followed.
+              // So its title should be exactly the question's topic so they match in analysis!
+              const title = q.topic || "Note";
 
-              let title = "Note";
+              // Do NOT update activeMainTopic based on the note's text, otherwise
+              // subsequent questions will get assigned this random note text as their topic!
 
-              // Extract the new topic directly from this specific trailing block
-              if (topicMatch) {
-                  title = topicMatch[1].replace(/<[^>]+>/g, '').replace(/#|\*|_/g, '').trim().substring(0, 50);
-              } else {
-                  const lines = textAfterLastMatch.split('\n');
-                  let rawTitle = lines[0].replace(/<[^>]+>/g, '').replace(/#|\*|_/g, '').trim();
-                  title = rawTitle.substring(0, 50) || "Note";
-              }
-
-              // ALWAYS update the activeMainTopic to the newly discovered trailing note title (if valid)
-              // so subsequent questions fall under it.
-              if (title !== "Note") {
-                  activeMainTopic = title;
-              }
-
-              // Use the activeMainTopic for the note title
-              notes.push({ title: activeMainTopic || "Note", content: textAfterLastMatch });
+              notes.push({ title: title, content: textAfterLastMatch });
           }
       }
     } else if (cleanedBlock.length > 20 && !cleanedBlock.startsWith('Options')) {
@@ -382,11 +369,8 @@ export function parseMCQText(text: string): { questions: MCQItem[], notes: {titl
               }
           }
 
-          if (title !== "Note") {
-              activeMainTopic = title;
-          }
-
-          notes.push({ title: activeMainTopic || "Note", content: para.trim() });
+          // Don't modify activeMainTopic here as it could affect upcoming questions incorrectly
+          notes.push({ title: title !== "Note" ? title : (activeMainTopic || "Note"), content: para.trim() });
       }
     }
 
